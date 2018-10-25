@@ -28,7 +28,11 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <include layout="@layout/content_main"/>
+        <include
+                android:id="@+id/content"
+                layout="@layout/activity_tip_calculator_content"
+                app:vm="@{vm}"
+        />
 
         <android.support.design.widget.FloatingActionButton
                 android:layout_width="wrap_content"
