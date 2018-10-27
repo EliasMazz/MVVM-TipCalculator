@@ -12,9 +12,33 @@ import com.eliasmazz.tipcalculator.viewmodel.CalculatorViewModel
 
 import kotlinx.android.synthetic.main.activity_tip_calculator.*
 
-class TipCalculatorActivity : AppCompatActivity() {
+class TipCalculatorActivity : AppCompatActivity(), SaveDialogFragment.Callback {
 
     lateinit var binding: ActivityTipCalculatorBinding
+
+    override fun onSaveTip(name: String) {
+        Snackbar.make(binding.root, "Saved $name", Snackbar.LENGTH_SHORT).show()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_save -> {
+                showSaveDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun showSaveDialog() {
+        val saveFragment = SaveDialogFragment()
+        saveFragment.show(supportFragmentManager, "SaveDialog")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
