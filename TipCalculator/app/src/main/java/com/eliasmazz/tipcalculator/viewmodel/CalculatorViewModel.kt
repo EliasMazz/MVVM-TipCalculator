@@ -2,29 +2,40 @@ package com.eliasmazz.tipcalculator.viewmodel
 
 import android.app.Application
 import android.databinding.BaseObservable
-import android.util.Log
 import com.eliasmazz.tipcalculator.R
-import com.eliasmazz.tipcalculator.model.RestaurantCalculator
+import com.eliasmazz.tipcalculator.model.Calculator
 import com.eliasmazz.tipcalculator.model.TipCalculation
 
-class CalculatorViewModel(val app: Application, val calculator: RestaurantCalculator = RestaurantCalculator()) : BaseObservable() {
+class CalculatorViewModel(val app: Application, val calculator: Calculator = Calculator()) :
+    BaseObservable() {
 
     private val TAG = CalculatorViewModel::class.java.simpleName
+
+    private var lastTipCalculated = TipCalculation()
+
     var inputCheckAmount = ""
     var inputTipPercentage = ""
 
-    var outputCheckAmount = ""
-    var outputTipAmount = ""
-    var outputTotalDollarAmount = ""
+    val outputCheckAmount get() = app.getString(R.string.dollar_amount, lastTipCalculated.checkAmount)
+    val outputTipAmount get() = app.getString(R.string.dollar_amount, lastTipCalculated.tipAmount)
+    val outputTotalDollarAmount get() = app.getString(R.string.dollar_amount, lastTipCalculated.grandTotal)
+    val locationName get() = lastTipCalculated.locationName
+
 
     init {
         updateOutputs(TipCalculation())
     }
 
-    private fun updateOutputs(tc: TipCalculation){
-        outputCheckAmount = app.getString(R.string.dollar_amount,tc.checkAmount)
-        outputTipAmount = app.getString(R.string.dollar_amount,tc.tipAmount)
-        outputTotalDollarAmount = app.getString(R.string.dollar_amount,tc.grandTotal)
+    private fun updateOutputs(tc: TipCalculation) {
+        lastTipCalculated = tc
+        notifyChange()
+    }
+
+    fun saveCurrentTip(name: String) {
+        val tipToSave = lastTipCalculated.copy(locationName = name)
+        calculator.saveTipCalculation(tipToSave)
+        updateOutputs(tipToSave)
+
     }
 
     fun calculateTip() {

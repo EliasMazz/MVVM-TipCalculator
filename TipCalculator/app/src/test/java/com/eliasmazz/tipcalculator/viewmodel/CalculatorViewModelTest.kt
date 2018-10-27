@@ -2,7 +2,7 @@ package com.eliasmazz.tipcalculator.viewmodel
 
 import android.app.Application
 import com.eliasmazz.tipcalculator.R
-import com.eliasmazz.tipcalculator.model.RestaurantCalculator
+import com.eliasmazz.tipcalculator.model.Calculator
 import com.eliasmazz.tipcalculator.model.TipCalculation
 import junit.framework.Assert.assertEquals
 import org.junit.Before
@@ -17,7 +17,7 @@ class CalculatorViewModelTest {
     lateinit var calculatorViewModel: CalculatorViewModel
 
     @Mock
-    lateinit var mockRestaurantCalculator: RestaurantCalculator
+    lateinit var mockCalculator: Calculator
 
     @Mock
     lateinit var application: Application
@@ -25,12 +25,12 @@ class CalculatorViewModelTest {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        stubResource(0.0,"$0.00")
-        calculatorViewModel = CalculatorViewModel(application,mockRestaurantCalculator)
+        stubResource(0.0, "$0.00")
+        calculatorViewModel = CalculatorViewModel(application, mockCalculator)
     }
 
     private fun stubResource(given: Double, returnStub: String) {
-        `when`(application.getString(R.string.dollar_amount,given)).thenReturn(returnStub)
+        `when`(application.getString(R.string.dollar_amount, given)).thenReturn(returnStub)
     }
 
     @Test
@@ -40,12 +40,12 @@ class CalculatorViewModelTest {
 
 
         val stub = TipCalculation(checkAmount = 10.00, tipAmount = 1.5, grandTotal = 11.5)
-        `when`(mockRestaurantCalculator.calculateTip(10.00,15)).thenReturn(stub)
+        `when`(mockCalculator.calculateTip(10.00, 15)).thenReturn(stub)
 
 
-        stubResource(10.0,"$10.00")
-        stubResource(1.5,"$1.50")
-        stubResource(11.5,"$11.50")
+        stubResource(10.0, "$10.00")
+        stubResource(1.5, "$1.50")
+        stubResource(11.5, "$11.50")
 
         calculatorViewModel.calculateTip()
 
@@ -58,22 +58,41 @@ class CalculatorViewModelTest {
     }
 
     @Test
-    fun testCalculateTipBadTipPercentage(){
+    fun testCalculateTipBadTipPercentage() {
         calculatorViewModel.inputCheckAmount = "10.00"
         calculatorViewModel.inputTipPercentage = ""
 
         calculatorViewModel.calculateTip()
 
-        verify(mockRestaurantCalculator, never()).calculateTip(ArgumentMatchers.anyDouble(), ArgumentMatchers.anyInt())
+        verify(mockCalculator, never()).calculateTip(ArgumentMatchers.anyDouble(), ArgumentMatchers.anyInt())
     }
 
     @Test
-    fun testCalculateTipBadCheckAmount(){
+    fun testCalculateTipBadCheckAmount() {
         calculatorViewModel.inputCheckAmount = ""
         calculatorViewModel.inputTipPercentage = "15"
 
         calculatorViewModel.calculateTip()
 
-        verify(mockRestaurantCalculator, never()).calculateTip(ArgumentMatchers.anyDouble(), ArgumentMatchers.anyInt())
+        verify(mockCalculator, never()).calculateTip(ArgumentMatchers.anyDouble(), ArgumentMatchers.anyInt())
+    }
+
+    @Test
+    fun testSaveCurrentTip() {
+        val stub = TipCalculation(checkAmount = 10.00, tipAmount = 1.5, grandTotal = 11.5)
+        val locationName = "Green Eggs and Bacon"
+        fun setupTipCalculation() {
+            calculatorViewModel.inputCheckAmount = "10.00"
+            calculatorViewModel.inputTipPercentage = "15"
+
+            `when`(mockCalculator.calculateTip(10.00, 15)).thenReturn(stub)
+        }
+
+        setupTipCalculation()
+        calculatorViewModel.calculateTip()
+        calculatorViewModel.saveCurrentTip(locationName)
+        verify(mockCalculator).saveTipCalculation(stub.copy(locationName = locationName))
+
+        assertEquals(locationName, calculatorViewModel.locationName)
     }
 }
