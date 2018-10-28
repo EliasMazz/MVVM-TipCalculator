@@ -35,7 +35,6 @@ class CalculatorViewModel(val app: Application, val calculator: Calculator = Cal
         val tipToSave = lastTipCalculated.copy(locationName = name)
         calculator.saveTipCalculation(tipToSave)
         updateOutputs(tipToSave)
-
     }
 
     fun calculateTip() {
